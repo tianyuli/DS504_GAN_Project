@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 28 18:30:44 2019
-@author: Huimin Ren
 
-Edited on Apr 18th 2019
+"""
+Created on Apr 18th 2019
 @author: Tianyu Li
 """
 
 from keras.datasets import mnist
 from keras.models import Sequential, Model
-from keras.layers import Input, Dense, Activation, LeakyReLU, Dropout
+from keras.layers import Input, Dense, LeakyReLU, Dropout
 from keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,15 +26,26 @@ adam = Adam(lr=0.0002, beta_1=0.5)
 
 # Generator
 g = Sequential()
-g.add(Dense(256, input_dim = z_dim))
-g.add(Activation("relu"))
+g.add(Dense(256, input_dim = 100))
+g.add(LeakyReLU(0.2))
+g.add(Dense(256))
+g.add(LeakyReLU(0.2))
+g.add(Dense(256))
+g.add(LeakyReLU(0.2))
 g.add(Dense(784, activation='sigmoid')) 
-#g.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
+g.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 
 # Discrinimator
 d = Sequential()
 d.add(Dense(256, input_dim = 784))
-d.add(Activation("relu"))
+d.add(LeakyReLU(0.2))
+d.add(Dropout(0.3))
+d.add(Dense(256))
+d.add(LeakyReLU(0.2))
+d.add(Dropout(0.3))
+d.add(Dense(256))
+d.add(LeakyReLU(0.2))
+d.add(Dropout(0.3))
 d.add(Dense(1, activation='sigmoid'))
 d.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 
@@ -86,8 +93,8 @@ def train(epochs=1, plt_frq=1, BATCH_SIZE=128):
             d.trainable = False
             g_loss = gan.train_on_batch(noise, y2)
             
-        dLoss.append(d_loss[0])
-        gLoss.append(g_loss[0])
+        dLoss.append(d_loss)
+        gLoss.append(g_loss)
         
         if e%plt_frq == 0:
             generate_image()
